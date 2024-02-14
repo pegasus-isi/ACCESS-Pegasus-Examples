@@ -1,0 +1,48 @@
+bootstrap:docker
+From:centos:7
+
+%environment
+PATH=/opt/Montage/bin:/usr/bin:/bin
+
+%setup
+
+%post
+MONTAGE_HOME=/opt/Montage
+yum -y upgrade
+yum -y install epel-release yum-plugin-priorities
+
+yum -y install \
+    git \
+    freetype \
+    file \
+    gcc \
+    gcc-gfortran \
+    make \
+    libjpeg-turbo-devel \
+    openjpeg-devel \
+    python36-pika \
+    python36-PyYAML \
+    python3-devel \
+    python3-future \
+    python3-pip \
+    unzip \
+    wget
+
+# want astropy in the python3 install
+pip3 install astropy
+
+# Cleaning caches to reduce size of image
+yum clean all
+
+# get montage dev branch and build
+cd /opt \
+    && git clone https://github.com/Caltech-IPAC/Montage.git \
+    && cd ${MONTAGE_HOME} \
+    && git checkout b571d7541e4d86be38b29fdcac712f417a2d8374 \
+    && ./configure \
+    && make 
+
+# build mAddMem executable
+cd ${MONTAGE_HOME}/MontageLib/AddMem \
+    && make \
+    && cp mAddMem ${MONTAGE_HOME}/bin/mAddMem
