@@ -1,0 +1,42 @@
+Bootstrap: docker
+From: ollama/ollama:latest
+
+%post
+    apt-get -y update
+    apt-get install -y \
+        bzip2 \
+        curl \
+        python3-pip \
+        python3-six \
+        wget
+
+    # install miniconda
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh
+    bash /tmp/miniconda.sh -b -p /opt/conda
+    rm /tmp/miniconda.sh
+    export PATH="/opt/conda/bin:$PATH"
+
+    # configure conda
+    conda config --add channels conda-forge
+
+    # install ollama and fastembed
+    pip3 install ollama fastembed
+
+    # install langchain Chroma
+    conda install -c conda-forge langchain chromadb pypdf
+
+    # include the models we want to use
+    export OLLAMA_MODELS=/usr/share/ollama/models
+    ollama serve &
+    OLLAMA_PID=$!
+    sleep 15s
+    ollama pull mistral
+    ollama list
+    kill $OLLAMA_PID
+
+%environment
+    export PATH="/opt/conda/bin:$PATH"
+    . /opt/conda/etc/profile.d/conda.sh
+    conda activate
+    export OLLAMA_MODELS=/usr/share/ollama/models
+

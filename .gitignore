@@ -7,4 +7,5 @@
 **/storage/
 **/transformations.yml
 **/workflow.yml
+**/*.sif
 
