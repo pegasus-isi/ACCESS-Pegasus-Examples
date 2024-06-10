@@ -23,7 +23,7 @@ From: ollama/ollama:latest
     pip3 install ollama fastembed
 
     # install langchain Chroma
-    conda install -c conda-forge langchain chromadb pypdf
+    conda install -c conda-forge langchain langchain-community chromadb pypdf
 
     # include the models we want to use
     export OLLAMA_MODELS=/usr/share/ollama/models
