@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# work around HTCondor setting HOME=/
+export HOME=$_CONDOR_JOB_IWD
+
 # pick a unique port for this instance
 export OLLAMA_PORT=$((($RANDOM % 30000) + 10000))
 export OLLAMA_HOST=127.0.0.1:$OLLAMA_PORT
