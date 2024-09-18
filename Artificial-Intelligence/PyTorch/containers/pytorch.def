@@ -1,0 +1,9 @@
+Bootstrap: docker
+From: pytorch/pytorch
+
+%post
+    apt-get -y update
+    apt-get install -y \
+        bzip2 \
+        curl
+
