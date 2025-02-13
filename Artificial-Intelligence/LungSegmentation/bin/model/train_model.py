@@ -51,7 +51,7 @@ if __name__ == "__main__":
     unet = UNet(args)
     config = {}
     with open(os.path.join(args.input_dir, args.params_file), 'r') as f:
-    config = eval(f.read())['params']
+        config = eval(f.read())['params']
 
     BACKBONE = 'seresnet34'
     preprocess_input = get_preprocessing(BACKBONE)
