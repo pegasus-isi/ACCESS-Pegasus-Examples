@@ -1,5 +1,7 @@
-import glob,os, sys
-import numpy as np 
+#!/usr/bin/env python3
+
+import glob, os, sys
+import numpy as np
 import pandas as pd
 from bs4 import BeautifulSoup
 from PIL import Image
@@ -18,13 +20,14 @@ import time
 import re
 
 
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
+
 def create_confusion_matrix(y_true, y_pred, cm_file):
-    """ creates and plots a confusion matrix given two list (targets and predictions)
+    """creates and plots a confusion matrix given two list (targets and predictions)
     :param list y_true: list of all targets (in this case integers bc. they are indices)
     :param list y_pred: list of all predictions (in this case one-hot encoded)
     """
-
-    amount_classes = len(classes)
 
     cm = confusion_matrix(y_true, y_pred)
     disp = ConfusionMatrixDisplay(confusion_matrix=cm)
@@ -37,14 +40,14 @@ def generate_label(obj):
     """
     returns the class of the detected object
     """
-    if obj.find('name').text == "with_mask":
+    if obj.find("name").text == "with_mask":
         return 1
-    elif obj.find('name').text == "without_mask":
+    elif obj.find("name").text == "without_mask":
         return 0
     return 2
 
 
-def generate_target(image_id, file): 
+def generate_target(image_id, file):
     """
     returns a dictionary target consisting of boxes, labels and image ID of the image
     :input: image ID, annotation file
@@ -52,7 +55,7 @@ def generate_target(image_id, file):
     with open(file) as f:
         data = f.read()
         soup = BeautifulSoup(data, "html.parser")
-        objects = soup.find_all('object')
+        objects = soup.find_all("object")
 
         num_objs = len(objects)
         boxes = []
@@ -72,6 +75,7 @@ def generate_target(image_id, file):
         target["image_id"] = img_id
         return target
 
+
 def get_model_instance_segmentation(num_classes):
     """
     initialise model
@@ -84,37 +88,38 @@ def get_model_instance_segmentation(num_classes):
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
     return model
 
+
 def generate_box(obj):
-    xmin = int(obj.find('xmin').text)
-    ymin = int(obj.find('ymin').text)
-    xmax = int(obj.find('xmax').text)
-    ymax = int(obj.find('ymax').text)
+    xmin = int(obj.find("xmin").text)
+    ymin = int(obj.find("ymin").text)
+    xmax = int(obj.find("xmax").text)
+    ymax = int(obj.find("ymax").text)
 
     return [xmin, ymin, xmax, ymax]
 
 
-#-------------- DATASET CLASS ------------------------------------
+# -------------- DATASET CLASS ------------------------------------
 class MaskDataset(object):
     def __init__(self, prefix, transforms):
         self.transforms = transforms
         self.prefix = prefix
         if prefix == "train_":
-            self.imgs = glob.glob(prefix+"*.png")+glob.glob("val_*.png")
+            self.imgs = glob.glob(prefix + "*.png") + glob.glob("val_*.png")
         else:
-            self.imgs = glob.glob(prefix+"*.png")
+            self.imgs = glob.glob(prefix + "*.png")
         self.size = len(self.imgs)
 
     def __getitem__(self, idx):
         # load images ad masks
 
         file_image = self.imgs[idx]
-        ind = re.findall(r'\d+', self.imgs[idx])[0]
-        file_label = 'maksssksksss'+ ind + '.xml'
+        ind = re.findall(r"\d+", self.imgs[idx])[0]
+        file_label = "maksssksksss" + ind + ".xml"
 
         img = Image.open(file_image).convert("RGB")
-        #Generate Label
+        # Generate Label
         target = generate_target(int(ind), file_label)
-        
+
         if self.transforms is not None:
             img = self.transforms(img)
 
@@ -129,23 +134,29 @@ def collate_func(batch):
 
 
 def evaluate(model_file, evaluate_file, cm_file):
-    
-    data_transform = transforms.Compose([transforms.ToTensor(),])
-    
+
+    data_transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+        ]
+    )
+
     # prefix as the first parameter and transformation as the second
-    test_dataset = MaskDataset("test_",data_transform)
-    
+    test_dataset = MaskDataset("test_", data_transform)
+
     # create data-loaders
-    test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=1,shuffle=True, collate_fn=collate_func)
+    test_dataloader = torch.utils.data.DataLoader(
+        test_dataset, batch_size=1, shuffle=True, collate_fn=collate_func
+    )
 
     model2 = get_model_instance_segmentation(3)
     model2.load_state_dict(torch.load(model_file))
     model2.eval()
     model2.to(device)
-    
+
     running_loss = 0.0
     loss_value = 0.0
-    
+
     y_test = []
     predictions = []
     for images, targets in test_dataloader:
@@ -161,13 +172,15 @@ def evaluate(model_file, evaluate_file, cm_file):
             # loss_dict[index]['labels']
             # loss_dict[index]['scores']
             for x in range(len(loss_dict)):
-                loss_value += sum(loss for loss in loss_dict[x]['scores'])
-                predictions.append(loss_dict[x]['scores'])
+                loss_value += sum(loss for loss in loss_dict[x]["scores"])
+                predictions.append(loss_dict[x]["scores"])
 
         running_loss += loss_value
-        
+
     with open(evaluate_file, "w") as txt_file:
-        txt_file.write("Model Evaluation : running loss --->".format(float(running_loss)) + "\n")
+        txt_file.write(
+            "Model Evaluation : running loss --->".format(float(running_loss)) + "\n"
+        )
 
     predictions, targets = [], []
     for image, labels in test_dataloader:
@@ -179,8 +192,9 @@ def evaluate(model_file, evaluate_file, cm_file):
         for i in range(len(y_test)):
             predictions.append(y_pred[i])
             targets.append(y_test[i])
-    
+
     create_confusion_matrix(targets, predictions, cm_file)
+
 
 if __name__ == "__main__":
     model_file = sys.argv[1]
