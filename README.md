@@ -31,7 +31,7 @@ Getting started
 ===============
 
 To get started, use a web browser and log in to https://access.pegasus.isi.edu . Use your ACCESS credentials to log in and start a Jupyter notebook
-From there, start a shell by clicking the menu (Clusters > Shell), and check out the repostitory:
+From there, start a shell by clicking the menu (Clusters > Shell), and check out the repository:
 
 <p align="center">
   <img src="/images/terminal-start.png" style="width: 200px;"/>
@@ -86,7 +86,7 @@ This chapter covers information regarding how to get in touch with our team, cit
 
 Workflow Examples
 =================
-Pegasus is curently being used in a broad range of scientific domains. This repository contains the workflow notebooks corresponding to various domains listed here, each notebook shown here is using actual data and executables. This page gives a brief overview of each of the workflow, for more details please go to corresponding folder.
+Pegasus is currently being used in a broad range of scientific domains. This repository contains the workflow notebooks corresponding to various domains listed here, each notebook shown here is using actual data and executables. This page gives a brief overview of each of the workflow, for more details please go to corresponding folder.
 
 
 Artificial Intelligence
