@@ -83,12 +83,14 @@ def myexit(rc):
 
 
 def get_hostname_and_ip():
+    host_name = None
+    host_ip = None
     try:
         host_name = socket.gethostname()
         host_ip = socket.gethostbyname(host_name)
-    except:
-        logger.error("Unable to get Hostname and IP")
-
+    except Exception as e:
+        logger.error("Unable to get Hostname and IP {}".format(e))
+        
     return "Hostname: {} IP Addr: {}".format(host_name, host_ip)
 
 
