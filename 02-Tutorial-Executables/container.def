@@ -2,8 +2,11 @@ Bootstrap: docker
 From: rockylinux:9
     
 %environment
+    PATH=/opt/pegasus-tutorial/:$PATH
+    export PATH
 
 %post
+    BASE_DIR="/opt"
     dnf install -y \
         bzip2 \
         python3-pip \
@@ -12,3 +15,7 @@ From: rockylinux:9
 
     pip3 install psutil
 
+    mkdir -p ${BASE_DIR}/pegasus-tutorial
+    cd ${BASE_DIR}/pegasus-tutorial
+    wget https://raw.githubusercontent.com/pegasus-isi/hpc-examples/refs/heads/main/executables/pegasus-keg.py
+    chmod +x pegasus-keg.py
