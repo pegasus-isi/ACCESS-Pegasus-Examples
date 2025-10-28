@@ -1,0 +1,14 @@
+Bootstrap: docker
+From: rockylinux:9
+    
+%environment
+
+%post
+    dnf install -y \
+        bzip2 \
+        python3-pip \
+        python3-six \
+        wget
+
+    pip3 install psutil
+
